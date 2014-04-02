@@ -1,0 +1,39 @@
+C:\Users\Win7\Documents\School 2013-2014\Lab SoftwareOntwikkeling Ubervak 3\Week 10\The Final Re-redemption\The Final Re-redemption\bin\Debug\The Final Re-redemption.exe.config
+C:\Users\Win7\Documents\School 2013-2014\Lab SoftwareOntwikkeling Ubervak 3\Week 10\The Final Re-redemption\The Final Re-redemption\bin\Debug\The Final Re-redemption.exe
+C:\Users\Win7\Documents\School 2013-2014\Lab SoftwareOntwikkeling Ubervak 3\Week 10\The Final Re-redemption\The Final Re-redemption\bin\Debug\The Final Re-redemption.pdb
+C:\Users\Win7\Documents\School 2013-2014\Lab SoftwareOntwikkeling Ubervak 3\Week 10\The Final Re-redemption\The Final Re-redemption\obj\Debug\The Final Re-redemption.csprojResolveAssemblyReference.cache
+C:\Users\Win7\Documents\School 2013-2014\Lab SoftwareOntwikkeling Ubervak 3\Week 10\The Final Re-redemption\The Final Re-redemption\obj\Debug\MainWindow.baml
+C:\Users\Win7\Documents\School 2013-2014\Lab SoftwareOntwikkeling Ubervak 3\Week 10\The Final Re-redemption\The Final Re-redemption\obj\Debug\MainWindow.g.cs
+C:\Users\Win7\Documents\School 2013-2014\Lab SoftwareOntwikkeling Ubervak 3\Week 10\The Final Re-redemption\The Final Re-redemption\obj\Debug\App.g.cs
+C:\Users\Win7\Documents\School 2013-2014\Lab SoftwareOntwikkeling Ubervak 3\Week 10\The Final Re-redemption\The Final Re-redemption\obj\Debug\The Final Re-redemption_MarkupCompile.cache
+C:\Users\Win7\Documents\School 2013-2014\Lab SoftwareOntwikkeling Ubervak 3\Week 10\The Final Re-redemption\The Final Re-redemption\obj\Debug\The Final Re-redemption.g.resources
+C:\Users\Win7\Documents\School 2013-2014\Lab SoftwareOntwikkeling Ubervak 3\Week 10\The Final Re-redemption\The Final Re-redemption\obj\Debug\The_Final_Re_redemption.Properties.Resources.resources
+C:\Users\Win7\Documents\School 2013-2014\Lab SoftwareOntwikkeling Ubervak 3\Week 10\The Final Re-redemption\The Final Re-redemption\obj\Debug\The Final Re-redemption.csproj.GenerateResource.Cache
+C:\Users\Win7\Documents\School 2013-2014\Lab SoftwareOntwikkeling Ubervak 3\Week 10\The Final Re-redemption\The Final Re-redemption\obj\Debug\The Final Re-redemption.exe
+C:\Users\Win7\Documents\School 2013-2014\Lab SoftwareOntwikkeling Ubervak 3\Week 10\The Final Re-redemption\The Final Re-redemption\obj\Debug\The Final Re-redemption.pdb
+C:\Users\Win7\Documents\School 2013-2014\Lab SoftwareOntwikkeling Ubervak 3\Week 10\The Final Re-redemption\The Final Re-redemption\bin\Debug\HtmlAgilityPack.dll
+C:\Users\Win7\Documents\School 2013-2014\Lab SoftwareOntwikkeling Ubervak 3\Week 10\The Final Re-redemption\The Final Re-redemption\bin\Debug\HtmlAgilityPack.pdb
+C:\Users\Win7\Documents\School 2013-2014\Lab SoftwareOntwikkeling Ubervak 3\Week 10\The Final Re-redemption\The Final Re-redemption\bin\Debug\HtmlAgilityPack.xml
+C:\Users\Win7\Documents\School 2013-2014\Lab SoftwareOntwikkeling Ubervak 3\Week 10\The Final Re-redemption\The Final Re-redemption\obj\Debug\Statistics.baml
+C:\Users\Win7\Documents\School 2013-2014\Lab SoftwareOntwikkeling Ubervak 3\Week 10\The Final Re-redemption\The Final Re-redemption\obj\Debug\App.baml
+C:\Users\Win7\Documents\School 2013-2014\Lab SoftwareOntwikkeling Ubervak 3\Week 10\The Final Re-redemption\The Final Re-redemption\obj\Debug\Statistics.g.cs
+C:\Users\Win7\Documents\School 2013-2014\Lab Software Ontwikkeling 4\Movie Database\The Final Re-redemption\bin\Debug\The Final Re-redemption.exe.config
+C:\Users\Win7\Documents\School 2013-2014\Lab Software Ontwikkeling 4\Movie Database\The Final Re-redemption\obj\Debug\The Final Re-redemption.exe
+C:\Users\Win7\Documents\School 2013-2014\Lab Software Ontwikkeling 4\Movie Database\The Final Re-redemption\obj\Debug\The Final Re-redemption.pdb
+C:\Users\Win7\Documents\School 2013-2014\Lab Software Ontwikkeling 4\Movie Database\The Final Re-redemption\bin\Debug\The Final Re-redemption.exe
+C:\Users\Win7\Documents\School 2013-2014\Lab Software Ontwikkeling 4\Movie Database\The Final Re-redemption\bin\Debug\The Final Re-redemption.pdb
+C:\Users\Win7\Documents\School 2013-2014\Lab Software Ontwikkeling 4\Movie Database\The Final Re-redemption\bin\Debug\HtmlAgilityPack.pdb
+C:\Users\Win7\Documents\School 2013-2014\Lab Software Ontwikkeling 4\Movie Database\The Final Re-redemption\bin\Debug\HtmlAgilityPack.xml
+C:\Users\Win7\Documents\School 2013-2014\Lab Software Ontwikkeling 4\Movie Database\The Final Re-redemption\obj\Debug\The Final Re-redemption.csprojResolveAssemblyReference.cache
+C:\Users\Win7\Documents\School 2013-2014\Lab Software Ontwikkeling 4\Movie Database\The Final Re-redemption\obj\Debug\MainWindow.baml
+C:\Users\Win7\Documents\School 2013-2014\Lab Software Ontwikkeling 4\Movie Database\The Final Re-redemption\obj\Debug\Statistics.baml
+C:\Users\Win7\Documents\School 2013-2014\Lab Software Ontwikkeling 4\Movie Database\The Final Re-redemption\obj\Debug\App.baml
+C:\Users\Win7\Documents\School 2013-2014\Lab Software Ontwikkeling 4\Movie Database\The Final Re-redemption\obj\Debug\MainWindow.g.cs
+C:\Users\Win7\Documents\School 2013-2014\Lab Software Ontwikkeling 4\Movie Database\The Final Re-redemption\obj\Debug\Statistics.g.cs
+C:\Users\Win7\Documents\School 2013-2014\Lab Software Ontwikkeling 4\Movie Database\The Final Re-redemption\obj\Debug\App.g.cs
+C:\Users\Win7\Documents\School 2013-2014\Lab Software Ontwikkeling 4\Movie Database\The Final Re-redemption\obj\Debug\The Final Re-redemption_MarkupCompile.cache
+C:\Users\Win7\Documents\School 2013-2014\Lab Software Ontwikkeling 4\Movie Database\The Final Re-redemption\obj\Debug\The Final Re-redemption.g.resources
+C:\Users\Win7\Documents\School 2013-2014\Lab Software Ontwikkeling 4\Movie Database\The Final Re-redemption\obj\Debug\The_Final_Re_redemption.Properties.Resources.resources
+C:\Users\Win7\Documents\School 2013-2014\Lab Software Ontwikkeling 4\Movie Database\The Final Re-redemption\obj\Debug\The Final Re-redemption.csproj.GenerateResource.Cache
+C:\Users\Win7\Documents\School 2013-2014\Lab Software Ontwikkeling 4\Movie Database\The Final Re-redemption\obj\Debug\GeneratedInternalTypeHelper.g.cs
+C:\Users\Win7\Documents\School 2013-2014\Lab Software Ontwikkeling 4\Movie Database\The Final Re-redemption\obj\Debug\The Final Re-redemption_MarkupCompile.lref

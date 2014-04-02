@@ -1,0 +1,12 @@
+C:\Users\Win7\Documents\School 2013-2014\Lab SoftwareOntwikkeling Ubervak 3\Week 10\GetActorsIDs\GetActorsIDs\bin\Debug\GetActorsIDs.exe.config
+C:\Users\Win7\Documents\School 2013-2014\Lab SoftwareOntwikkeling Ubervak 3\Week 10\GetActorsIDs\GetActorsIDs\bin\Debug\GetActorsIDs.exe
+C:\Users\Win7\Documents\School 2013-2014\Lab SoftwareOntwikkeling Ubervak 3\Week 10\GetActorsIDs\GetActorsIDs\bin\Debug\GetActorsIDs.pdb
+C:\Users\Win7\Documents\School 2013-2014\Lab SoftwareOntwikkeling Ubervak 3\Week 10\GetActorsIDs\GetActorsIDs\bin\Debug\HtmlAgilityPack.dll
+C:\Users\Win7\Documents\School 2013-2014\Lab SoftwareOntwikkeling Ubervak 3\Week 10\GetActorsIDs\GetActorsIDs\bin\Debug\HtmlAgilityPack.pdb
+C:\Users\Win7\Documents\School 2013-2014\Lab SoftwareOntwikkeling Ubervak 3\Week 10\GetActorsIDs\GetActorsIDs\bin\Debug\HtmlAgilityPack.xml
+C:\Users\Win7\Documents\School 2013-2014\Lab SoftwareOntwikkeling Ubervak 3\Week 10\GetActorsIDs\GetActorsIDs\obj\Debug\GetActorsIDs.csprojResolveAssemblyReference.cache
+C:\Users\Win7\Documents\School 2013-2014\Lab SoftwareOntwikkeling Ubervak 3\Week 10\GetActorsIDs\GetActorsIDs\obj\Debug\GetActorsIDs.Form1.resources
+C:\Users\Win7\Documents\School 2013-2014\Lab SoftwareOntwikkeling Ubervak 3\Week 10\GetActorsIDs\GetActorsIDs\obj\Debug\GetActorsIDs.Properties.Resources.resources
+C:\Users\Win7\Documents\School 2013-2014\Lab SoftwareOntwikkeling Ubervak 3\Week 10\GetActorsIDs\GetActorsIDs\obj\Debug\GetActorsIDs.csproj.GenerateResource.Cache
+C:\Users\Win7\Documents\School 2013-2014\Lab SoftwareOntwikkeling Ubervak 3\Week 10\GetActorsIDs\GetActorsIDs\obj\Debug\GetActorsIDs.exe
+C:\Users\Win7\Documents\School 2013-2014\Lab SoftwareOntwikkeling Ubervak 3\Week 10\GetActorsIDs\GetActorsIDs\obj\Debug\GetActorsIDs.pdb

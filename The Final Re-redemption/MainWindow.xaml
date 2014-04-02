@@ -1,0 +1,155 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:The_Final_Re_redemption" x:Name="MainWindow1" x:Class="The_Final_Re_redemption.MainWindow"
+        Title="Final Re-redemption: My IMDb DB" Height="560" Width="1000" Background="{DynamicResource BackGroundStyle}"
+        Icon="./imdb.ico" Loaded="MainWindow1_Loaded">
+    <Window.Resources>
+        <LinearGradientBrush x:Key="MenuStyle" EndPoint="0,1" StartPoint="0,0">
+            <GradientStop Color="#FFAE9655"/>
+            <GradientStop Color="#FFFFD259" Offset="0.113"/>
+            <GradientStop Color="#FFAE9655" Offset="1"/>
+            <GradientStop Color="#FFAF985C" Offset="1"/>
+            <GradientStop Color="#FFFFD259" Offset="0.469"/>
+        </LinearGradientBrush>
+    </Window.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="225"/>
+            <ColumnDefinition Width="225"/>
+            <ColumnDefinition Width="369"/>
+            <ColumnDefinition Width="171"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="121"/>
+            <RowDefinition Height="378"/>
+            <RowDefinition Height="21"/>
+        </Grid.RowDefinitions>
+        <StatusBar x:Name="StatusBar" HorizontalAlignment="Left" Height="25" Margin="-3,0,-14,-7" Grid.Row="2" VerticalAlignment="Bottom" Width="1006" BorderThickness="0,1,0,0" BorderBrush="#FF828790" Foreground="Black" Grid.ColumnSpan="4">
+            <StatusBarItem Margin="3,-5,0,0" BorderBrush="#FF828790" Height="25" Width="1006">
+                <TextBlock x:Name="StatusBarText" />
+            </StatusBarItem>
+        </StatusBar>
+        <Menu HorizontalAlignment="Left" Height="25" VerticalAlignment="Top" Width="992" Grid.ColumnSpan="4" Background="{DynamicResource StatStyle}">
+            <MenuItem x:Name="MenuDatabase" Header="Database">
+                <MenuItem Click="ClearDB" Header="Clear database" />
+                <MenuItem Click="loadButton_Click" Header="Load database" />
+                <MenuItem Click="saveButton_Click" Header="Save database" />
+                <MenuItem Click="ShowStats" Header="Show statistics"/>
+                <MenuItem Click="CloseButton_Click" Header="Exit"/>
+            </MenuItem>
+        </Menu>
+        <TextBox x:Name="ActorTextBox" HorizontalAlignment="Left" Height="23" Margin="8,90,0,0" TextWrapping="Wrap" Text="Enter actor's name.." VerticalAlignment="Top" Width="120" GotKeyboardFocus="ActorBox_GotKeyboardFocus" LostKeyboardFocus="ActorBox_LostKeyboardFocus" Foreground="Gray"/>
+        <ListBox x:Name="ActorListBox" ItemsSource="{Binding SelectedPerson.ActorOf}" HorizontalAlignment="Left" Height="250" Margin="10,30,0,0" Grid.Row="1" VerticalAlignment="Top" Width="205" SelectionChanged="ActorListBox_SelectionChanged">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding MovieName}"/>
+                            <TextBlock Visibility="Hidden" Text="{Binding MovieId}"/>
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <Button x:Name="StartDLQButton" Content="Start downloading queue" Grid.Column="1" HorizontalAlignment="Left" Margin="10,91,0,0" VerticalAlignment="Top" Width="205" Height="22" Background="{DynamicResource MenuStyle}" Click="StartDLQButton_Click"/>
+        <ListBox x:Name="QList" Grid.Column="1" HorizontalAlignment="Left" Height="250" Margin="10,30,0,0" Grid.Row="1" VerticalAlignment="Top" Width="207">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding MovieName}"/>
+                            <TextBlock Visibility="Hidden" Text="{Binding MovieId}"/>
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <ListBox Visibility="Hidden" x:Name="MList" SelectedItem="{Binding SelectedMovie}" ItemsSource="{Binding AllMovies}"  Grid.Column="1" HorizontalAlignment="Left" Height="250" Margin="10,30,0,0" Grid.Row="1" VerticalAlignment="Top" Width="205" SelectionChanged="_SelectionChanged">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding Name}"/>
+                            <TextBlock Height="1" Width="1" Visibility="Hidden" Text="{Binding Id}"/>
+                            <TextBlock Height="1" Width="1" Visibility="Hidden" Text="{Binding Year}"/>
+                            <TextBlock Height="1" Width="1" Visibility="Hidden" Text="{Binding Rating}"/>
+                            <TextBlock Height="1" Width="1" Visibility="Hidden" Text="{Binding MyRating}"/>
+                            <TextBlock Height="1" Width="1" Visibility="Hidden" Text="{Binding Genres}"/>
+                            <TextBlock Height="1" Width="1" Visibility="Hidden" Text="{Binding SeenIt}"/>
+                            <TextBlock Height="1" Width="1" Visibility="Hidden" Text="{Binding Wishlisted}"/>
+                            <Label Height="1" Width="1" Visibility="Hidden" Content="{Binding Synopsis}"/>
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <Button x:Name="DeleteButton" Content="Delete movie" HorizontalAlignment="Left" Margin="10,238,0,0" VerticalAlignment="Top" Width="205" Background="{DynamicResource MenuStyle}" Height="22" Grid.Column="1" Grid.Row="1" Opacity="0" MouseEnter="DeleteButton_MouseEnter" MouseLeave="DeleteButton_MouseLeave" Click="DeleteButton_Click" Visibility="Hidden"/>
+        <ListBox Visibility="Hidden" SelectedItem="{Binding SelectedPerson}" ItemsSource="{Binding AllActors}" x:Name="AllAList" Grid.Column="1" HorizontalAlignment="Left" Height="250" Margin="10,30,0,0" Grid.Row="1" VerticalAlignment="Top" Width="205" SelectionChanged="AllAList_SelectionChanged">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding Name}"/>
+                            <TextBlock Visibility="Hidden" Text="{Binding ActorOf}"/>
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <ListBox x:Name="WList" Grid.Column="1" SelectedItem="{Binding SelectedMovie}" ItemsSource="{Binding WishMovies}" HorizontalAlignment="Left" Height="250" Margin="10,30,0,0" Grid.Row="1" VerticalAlignment="Top" Width="205" Visibility="Hidden" SelectionChanged="_SelectionChanged">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding Name}"/>
+                            <TextBlock Height="1" Width="1" Visibility="Hidden" Text="{Binding Id}"/>
+                            <TextBlock Height="1" Width="1" Visibility="Hidden" Text="{Binding Year}"/>
+                            <TextBlock Height="1" Width="1" Visibility="Hidden" Text="{Binding Rating}"/>
+                            <TextBlock Height="1" Width="1" Visibility="Hidden" Text="{Binding MyRating}"/>
+                            <TextBlock Height="1" Width="1" Visibility="Hidden" Text="{Binding Genres}"/>
+                            <TextBlock Height="1" Width="1" Visibility="Hidden" Text="{Binding SeenIt}"/>
+                            <TextBlock Height="1" Width="1" Visibility="Hidden" Text="{Binding Wishlisted}"/>
+                            <Label Height="1" Width="1" Visibility="Hidden" Content="{Binding Synopsis}"/>
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <Label BorderBrush="#FF828790" BorderThickness="1,1,1,0" Background="White" Padding="2,1,0,0" x:Name="QueueLbl" Content="Queue" Grid.Column="1" HorizontalAlignment="Left" Margin="10,9,0,0" Grid.Row="1" VerticalAlignment="Top" Width="42" Height="22" MouseDown="QueueLbl_MouseDown"/>
+        <Label BorderBrush="#FF828790" BorderThickness="1,1,1,0" Padding="2,1,0,0" x:Name="MovieInDBLbl" Content="Movies" Grid.Column="1" HorizontalAlignment="Left" Margin="51,12,0,0" Grid.Row="1" VerticalAlignment="Top" Background="#FFFFD259" Height="18" Width="43" MouseDown="MovieInDBLbl_MouseDown"/>
+        <Label BorderBrush="#FF828790" BorderThickness="1,1,1,0" Padding="2,1,0,0" x:Name="ActorsInDB" Content="Actors" Grid.Column="1" HorizontalAlignment="Left" Margin="93,12,0,0" Grid.Row="1" VerticalAlignment="Top" Background="#FFFFD259" Height="18" Width="43" MouseDown="ActorsInDB_MouseDown"/>
+        <Label BorderBrush="#FF828790" BorderThickness="1,1,1,0" Padding="2,1,0,0" x:Name="WishListLbl" Content="Wishlist" Grid.Column="1" HorizontalAlignment="Left" Margin="171,12,0,0" Grid.Row="1" VerticalAlignment="Top" Background="#FFC3C3C3" Height="18" Width="46" MouseDown="WishListLbl_MouseDown"/>
+
+        <Rectangle Grid.Column="2" HorizontalAlignment="Left" Height="338" Margin="10,30,0,0" Grid.Row="1" Stroke="#FF828790" VerticalAlignment="Top" Width="520" Grid.ColumnSpan="2">
+            <Rectangle.Fill>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#FFFFD259" Offset="0"/>
+                    <GradientStop Color="#FFAE9655" Offset="1"/>
+                </LinearGradientBrush>
+            </Rectangle.Fill>
+        </Rectangle>
+        <Image x:Name="PosterMovie" Grid.Column="2" HorizontalAlignment="Left" Height="320" Margin="305,39,0,0" Grid.Row="1" VerticalAlignment="Top" Width="215" Grid.ColumnSpan="2"/>
+        <TextBlock x:Name="SynBlock" Grid.Column="2" HorizontalAlignment="Left" Margin="23,175,0,0" Grid.Row="1" TextWrapping="Wrap" Text="{Binding SelectedMovie.Synopsis, StringFormat='Synopsis: {0}'}" VerticalAlignment="Top" Height="136" Width="270"/>
+        <Label x:Name="YearLbl" ContentStringFormat="Year: {0}" Content="{Binding SelectedMovie.Year}" Grid.Column="2" HorizontalAlignment="Left" Margin="19,77,0,0" Grid.Row="1" VerticalAlignment="Top" Width="92" Height="26"/>
+        <Label x:Name="NameLbl" ContentStringFormat="Name: {0}" Content="{Binding SelectedMovie.Name}" Grid.Column="2" HorizontalAlignment="Left" Margin="19,51,0,0" Grid.Row="1" VerticalAlignment="Top" Width="281" Height="26"/>
+        <Label x:Name="IdLbl" ContentStringFormat="IMDb Id: {0}" Content="{Binding SelectedMovie.Id}" Grid.Column="2" HorizontalAlignment="Left" Margin="19,101,0,0" Grid.Row="1" VerticalAlignment="Top" Width="153" Height="26"/>
+        <TextBox x:Name="searchBox" HorizontalAlignment="Left" Height="23" Margin="10,311,0,0" TextWrapping="Wrap" Text="Enter Id.." VerticalAlignment="Top" Width="120" Grid.Column="1" Grid.Row="1" LostKeyboardFocus="searchBox_LostKeyboardFocus" GotKeyboardFocus="searchBox_GotKeyboardFocus" Foreground="Gray"/>
+        <Button x:Name="GetActorInfo" Content="Get info" HorizontalAlignment="Left" Margin="133,91,0,0" VerticalAlignment="Top" Width="82" Background="{DynamicResource MenuStyle}" Click="GetActorInfo_Click" Height="22"/>
+        <Button x:Name="Add2QButton" Content="Add to queue" HorizontalAlignment="Left" Margin="10,285,0,0" VerticalAlignment="Top" Width="205" Grid.Row="1" Click="Add2QButton_Click" Background="{DynamicResource MenuStyle}" Height="22"/>
+        <Button x:Name="SearchDBButton" Content="Search" HorizontalAlignment="Left" Margin="135,312,0,0" VerticalAlignment="Top" Width="82" Grid.Column="1" Grid.Row="1" Click="SearchDBButton_Click" Background="{DynamicResource MenuStyle}" Height="22"/>
+        <Label Content="Search for a movie:" Grid.Column="1" HorizontalAlignment="Left" Margin="10,285,0,0" Grid.Row="1" VerticalAlignment="Top" Height="26" Width="148"/>
+        <Label BorderBrush="#FF828790" Content="{Binding SelectedPerson.Name}" BorderThickness="1,1,1,1" Background="White" Padding="2,1,0,0" x:Name="ActorLbl" HorizontalAlignment="Left" Margin="10,3,0,0" Grid.Row="1" VerticalAlignment="Top" HorizontalContentAlignment="Center" Width="205" Height="22"/>
+        <Image Grid.Column="3" Margin="10,36,10,10" Source="IMDb-Logo2.gif" Stretch="Fill"/>
+        <Label x:Name="MyRatingLbl" ContentStringFormat="My Rating: {0}" Content="{Binding SelectedMovie.MyRating}" Grid.Column="2" HorizontalAlignment="Left" Margin="172,101,0,0" Grid.Row="1" VerticalAlignment="Top" Width="121" Height="26" MouseEnter="MyRatingLbl_MouseEnter" MouseLeave="MyRatingLbl_MouseLeave"/>
+        <Label x:Name="RatingLbl" ContentStringFormat="Rating: {0}" Content="{Binding SelectedMovie.Rating}" Grid.Column="2" HorizontalAlignment="Left" Margin="172,77,0,0" Grid.Row="1" VerticalAlignment="Top" Width="121" Height="26"/>
+        <Label x:Name="GenresLbl" ContentStringFormat="Genre(s): {0}" Content="{Binding SelectedMovie.Genres}" Grid.Column="2" HorizontalAlignment="Left" Margin="19,127,0,0" Grid.Row="1" VerticalAlignment="Top" Width="281" Height="26"/>
+        <CheckBox x:Name="SeenItCheck" Content="Seen It" IsChecked="{Binding SelectedMovie.SeenIt, Mode=TwoWay}" Grid.Column="2" HorizontalAlignment="Left" Margin="23,154,0,0" Grid.Row="1" VerticalAlignment="Top" />
+        <Button x:Name="AddAll2QButton" Content="Add all to queue" HorizontalAlignment="Left" Margin="11,311,0,0" VerticalAlignment="Top" Width="205" Grid.Row="1" Click="AddAll2QButton_Click" Background="{DynamicResource MenuStyle}" Height="22"/>
+        <TextBox Visibility="Hidden" x:Name="MyNewRatingBox" Grid.Column="2" HorizontalAlignment="Left" Height="23" Margin="236,103,0,0" Grid.Row="1" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="33" KeyDown="MyNewRatingBox_KeyDown"/>
+        <CheckBox x:Name="Wishlisted" Content="Wishlisted" IsChecked="{Binding SelectedMovie.Wishlisted, Mode=TwoWay}" Grid.Column="2" HorizontalAlignment="Left" Margin="94,154,0,0" Grid.Row="1" VerticalAlignment="Top" />
+
+
+    </Grid>
+</Window>
