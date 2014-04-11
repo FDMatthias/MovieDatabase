@@ -11,7 +11,22 @@ namespace The_Final_Re_redemption
     {
         public string Id { get; set; }
         public double Rating { get; set; }
-        public double MyRating { get; set; }
+        private double myrating;
+        public double MyRating
+        {
+            get { return myrating; }
+            set
+            {
+                if (value < 10.01 && value >= 0)
+                {
+                    myrating = value;
+                    if (PropertyChanged != null)
+                    {
+                        PropertyChanged(this, new PropertyChangedEventArgs("myrating"));
+                    }
+                }
+            }
+        }
         private bool seenit;
         public bool SeenIt {
             get

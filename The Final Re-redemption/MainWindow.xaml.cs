@@ -31,6 +31,23 @@ namespace The_Final_Re_redemption
 {
     public partial class MainWindow : Window
     {
+        public class DelegateCommand : ICommand
+        {
+            private Action _executeMethod;
+            public DelegateCommand(Action executeMethod)
+            {
+                _executeMethod = executeMethod;
+            }
+            public bool CanExecute(object parameter)
+            {
+                return true;
+            }
+            public event EventHandler CanExecuteChanged;
+            public void Execute(object parameter)
+            {
+                _executeMethod.Invoke();
+            }
+        }
         public class ViewModel
         {
             private ObservableCollection<Actor> a_Actors; //make an observablecollection of all actors
@@ -45,15 +62,45 @@ namespace The_Final_Re_redemption
                     a_Actors = value;
                 }
             }
+            #region Code for filtering the list
+            public ICommand FilterByWish
+            {
+                get { return new DelegateCommand(this.FilterTheWishes); }
+            }
+            public ICommand FullList
+            {
+                get { return new DelegateCommand(this.GiveFullList); }
+            } 
+            private ListCollectionView GetListCollectionView()
+            {
+                return (ListCollectionView)CollectionViewSource.GetDefaultView(this.AllMovies);
+            }
+            public void FilterTheWishes() { this.GetListCollectionView().Filter = this.IsWished; }
+            public void GiveFullList() { this.GetListCollectionView().Filter = this.IsMovie; }
+            private bool IsWished(object obj)
+            {
+                if(obj as Movie != null && (obj as Movie).Wishlisted == true)
+                {
+                    return true;
+                }
+                return false;
+            }
+            private bool IsMovie(object obj)
+            {
+                if (obj as Movie != null)
+                {
+                    return true;
+                }
+                return false;
+            }
+            #endregion
             private ObservableCollection<Movie> a_Movies; //make an observablecollection of all movies
             public ObservableCollection<Movie> AllMovies { get { return a_Movies; } set { a_Movies = value; } }
-            private ObservableCollection<Movie> w_Movies; //make an observablecollection of all movies
-            public ObservableCollection<Movie> WishMovies { get { return w_Movies; } set { w_Movies = value;  } } //return a selected list of a_Movies where movie.wishlisted == true?
+           
             public ViewModel() //constructor
             {
                 a_Actors = new ObservableCollection<Actor>();
                 a_Movies = new ObservableCollection<Movie>();
-                w_Movies = new ObservableCollection<Movie>();
             }
             private Actor m_SelectedPerson; //save selected actor
             public Actor SelectedPerson
@@ -79,8 +126,6 @@ namespace The_Final_Re_redemption
                     m_SelectedMovie = value;
                 }
             }
-
-            
         }
 
         Queue<PlayedIn> TheQ = new Queue<PlayedIn>();
@@ -142,7 +187,12 @@ namespace The_Final_Re_redemption
                 MList.Visibility = Visibility.Visible; //listbox Mlist visible, all other listboxes hidden
                 AllAList.Visibility = Visibility.Hidden;
                 QList.Visibility = Visibility.Hidden;
-                WList.Visibility = Visibility.Hidden;
+                viewModel.GiveFullList();
+                if(viewModel.SelectedMovie != null)
+                {
+                    DeleteButton.Visibility = Visibility.Visible;
+                    DeleteButton.Opacity = 0.6;
+                }
             }
             else if (sender.Equals(QueueLbl))
             {
@@ -154,7 +204,6 @@ namespace The_Final_Re_redemption
                 DeleteButton.Visibility = Visibility.Hidden;
                 AllAList.Visibility = Visibility.Hidden;
                 MList.Visibility = Visibility.Hidden;
-                WList.Visibility = Visibility.Hidden;
             }
             else if (sender.Equals(WishListLbl))
             {
@@ -162,13 +211,12 @@ namespace The_Final_Re_redemption
                 MovieInDBLbl.Margin = new Thickness(51, 12, 0, 0);
                 ActorsInDB.Margin = new Thickness(93, 12, 0, 0);
                 WishListLbl.Margin = new Thickness(169, 9, 0, 0);
-                WList.Visibility = Visibility.Visible;
                 DeleteButton.Visibility = Visibility.Hidden;
                 QList.Visibility = Visibility.Hidden;
-                MList.Visibility = Visibility.Hidden;
+                MList.Visibility = Visibility.Visible;
                 AllAList.Visibility = Visibility.Hidden;
                 QueueLbl.Background = (Brush)(new BrushConverter().ConvertFrom("#FFFFD259"));
-                
+                viewModel.FilterTheWishes();
             }
             else
             {
@@ -180,7 +228,6 @@ namespace The_Final_Re_redemption
                 DeleteButton.Visibility = Visibility.Hidden;
                 QList.Visibility = Visibility.Hidden;
                 MList.Visibility = Visibility.Hidden;
-                WList.Visibility = Visibility.Hidden;
             }
         }
         /*END SWITCH B/W Q - M - A*/
@@ -188,13 +235,11 @@ namespace The_Final_Re_redemption
         private void ClearDB(object sender, RoutedEventArgs e)
         {
             StatusBarText.Text = "Database cleared.";
-            ActorLbl.Content = "No Actor Selected";
+            ActorLbl.Content = "";
             if(viewModel.AllActors != null)
                 viewModel.AllActors.Clear();
             if (viewModel.AllMovies != null)
                 viewModel.AllMovies.Clear();
-            if (viewModel.WishMovies != null)
-                viewModel.WishMovies.Clear();
             QList.Items.Clear();
             TheQ.Clear();
         }
@@ -495,25 +540,18 @@ namespace The_Final_Re_redemption
         /*SEARCH MOVIE IN DB*/
         private void SearchDBButton_Click(object sender, RoutedEventArgs e)
         {
-            int neededindex = 0;
             if (searchBox.Text != "Enter Id..")
             {
-                foreach (var item in viewModel.AllMovies)
+                //var result = from o in MList.Items.OfType<Movie>() where o.Id.Contains(searchBox.Text.ToString()) select o;
+                var filteredItems = (ObservableCollection<Movie>)viewModel.AllMovies.Where( p => p.Id != null && p.Id.ToUpper().Contains(searchBox.Text.ToUpper()));
+                if (filteredItems != null)
                 {
-                    if (item.Id.Equals(searchBox.Text))
-                    {
-                        MList.SelectedIndex = neededindex; 
-                        SwitchLists(MovieInDBLbl, ActorsInDB, QueueLbl, WishListLbl);
-                        StatusBarText.Text = "Movie found in database and selected. You can find the info on the panel to the right.";
-                        break;
-                    }
-                    neededindex++;
-                    if (neededindex == viewModel.AllMovies.Count)
-                    {
-                        StatusBarText.Text = "Movie not found in database.";
-                        MessageBox.Show("Movie not found in database.");
-                    }
+                    Console.WriteLine(filteredItems);
+                    SwitchLists(MovieInDBLbl, ActorsInDB, QueueLbl, WishListLbl);
+                    StatusBarText.Text = "Movie found in database and selected. You can find the info on the panel to the right.";
                 }
+                else
+                    StatusBarText.Text = "Movie not found in database.";
             }
             else
             {
@@ -561,8 +599,6 @@ namespace The_Final_Re_redemption
      //       wc.DownloadProgressChanged += client_DownloadProgressChanged;
             StatusBarText.Text = "Downloading info from actor..";
             wc.DownloadStringAsync(new Uri("http://m.imdb.com/name/" + indexSite + "/filmotype/actor"));
-
-
         }
 
         //upon completing DLActor
@@ -596,15 +632,10 @@ namespace The_Final_Re_redemption
                     }
                 }
                 viewModel.AllActors.Add(chosenActor); //acteur aan db van alle acteurs toevoegen
-                //DIT MAG NU WEG DANKZIJ DATABINDIN: AllAList.Items.Add(new Actor { Name = chosenActor.Name, ActorOf = chosenActor.ActorOf }); //in rechterbox van acteur de acteur toevoegen (deze box is de database van de acteurs)                    
                 AllAList.SelectedIndex = AllAList.Items.Count - 1;
                 StatusBarText.Text = "Actor has been added to the list.";
                 SwitchLists(ActorsInDB, MovieInDBLbl, QueueLbl, WishListLbl);
-                //Update_ActorListBox(chosenActor); //linker box update met lijst van films van de acteur
-                //foreach (Actor actor in AllActors)
-                //{
-                //    AllAList.Items.Add(new Actor { Name = actor.Name, ActorOf = actor.ActorOf }); //in rechterbox van acteur de acteur toevoegen (deze box is de database van de acteurs)                    
-                //}
+                
             }
         }
 
@@ -622,8 +653,6 @@ namespace The_Final_Re_redemption
                 viewModel.AllActors.Clear();
             if (viewModel.AllMovies != null)
                 viewModel.AllMovies.Clear();
-            if (viewModel.WishMovies != null)
-                viewModel.WishMovies.Clear();
             dlg.ShowDialog();
             chosenFile = dlg.FileName; //pad opslaan in string chosenFile. Hierin wordt de database opgeslaan.
             try
@@ -643,9 +672,7 @@ namespace The_Final_Re_redemption
                             {
                                 actortoadd.ActorOf.Add(new PlayedIn(splitted2[y + 1], splitted2[y]));
                             }
-                       //    AllAList.Items.Add(new Actor { Name = actortoadd.Name, ActorOf = actortoadd.ActorOf });
                             viewModel.AllActors.Add(actortoadd);
-                            
                         }
                         else
                         {
@@ -664,8 +691,6 @@ namespace The_Final_Re_redemption
                                 Synopsis = splitted[9]
                             };
                             viewModel.AllMovies.Add(movietoadd);
-                            if (movietoadd.Wishlisted)
-                                viewModel.WishMovies.Add(movietoadd);
                         }
 
                     }
@@ -716,26 +741,14 @@ namespace The_Final_Re_redemption
         /*UPDATE INFO FROM SELECTED MOVIE*/
         private void _SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var item = ((sender as ListBox).SelectedItem as Movie);
-            if (item != null)
+            if (viewModel.SelectedMovie.Poster != null)
             {
-                if (item.SeenIt)
-                    SeenItCheck.IsChecked = true;
-                else
-                    SeenItCheck.IsChecked = false;
-                if (item.Wishlisted)
-                    Wishlisted.IsChecked = true;
-                else
-                    Wishlisted.IsChecked = false;
-                if (item.Poster != null)
-                    PosterMovie.Source = new BitmapImage(new Uri(Path.GetDirectoryName(chosenFile) + "\\Posters\\" + item.Poster));
+                PosterMovie.Source = new BitmapImage(new Uri(Path.GetDirectoryName(chosenFile) + "\\Posters\\" + viewModel.SelectedMovie.Poster));
                 StatusBarText.Text = "Movie has been selected, you can find the info in the panel on the right.";
             }
             DeleteButton.Visibility = Visibility.Visible;
             DeleteButton.Opacity = 0.6;
-            
         }
-
         /*DELETE BUTTON*/
         private void DeleteButton_MouseEnter(object sender, MouseEventArgs e)
         {
@@ -749,11 +762,9 @@ namespace The_Final_Re_redemption
         //Delete the selected item
         private void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
-            if (MList.Visibility == Visibility.Visible && viewModel.SelectedMovie != null)
+            if (viewModel.SelectedMovie != null)
             {
-                var todelete = viewModel.SelectedMovie as Movie;
-                viewModel.AllMovies.Remove(todelete);
-                MList.Items.Remove(todelete);
+                viewModel.AllMovies.Remove(viewModel.SelectedMovie);
             }
         }
 
@@ -762,123 +773,39 @@ namespace The_Final_Re_redemption
         {
             if (viewModel.SelectedMovie != null)
             {
-                var item1 = viewModel.SelectedMovie as Movie;
-                foreach (var item2 in viewModel.AllMovies)
-                {
-                    if (item2.Id.Equals(item1.Id))
-                    {
-                        if (SeenItCheck.IsChecked == true)
-                        {
-                            item1.SeenIt = true;
-                            item2.SeenIt = true;
-                            StatusBarText.Text = "You have seen this movie.";
-                        }
-                        else
-                        {
-                            item1.SeenIt = false;
-                            item2.SeenIt = false;
-                            StatusBarText.Text = "You have not seen this movie.";
-                        }
-                        break;
-                    }
-                }
+                StatusBarText.Text =
+                    "Changing 'Seen it'-status.";
             }
             else
             {
-                SeenItCheck.IsChecked = false;
                 StatusBarText.Text =
                     "Can't change value for 'Seen it' if you haven't selected a movie from the database";
             }
         }
         //ADD TO WISHLIST
         private void Add2Wishlist_Click(object sender, RoutedEventArgs e) 
-        {//deze code is nogal rommelig, maar ze werkt. De reden waarom ze rommelig is omdat het erg moeilijk is om zowel in de movie list als in de MList als in de WList de waarde van Wishlisted aan te passen, en vervolgens daarop te handelen (item uit/in de lijst halen/zetten). Plus dit is het laatste dat ik er bij zette en ik was het eerlijk gezegd beu. If it works, I snorks.
-            if ((string) IdLbl.Content != "IMDb Id:") //er is effectief een movie geselecteerd
+        {
+            if (viewModel.SelectedMovie != null) //er is effectief een movie geselecteerd
             {
-                var Mitem = new Movie();
-                Movie Witem = null;
-                int neededindex = 0;
-                string[] split = new string[3];
-                split = IdLbl.Content.ToString().Split(' ');
-
-                foreach (var searchitem in viewModel.AllMovies) //nog een keer zeker beide items selecteren zowel in MList als in WList
+                if (Wishlisted.IsChecked == true)
                 {
-                    if (searchitem.Id.Equals(split[2])) //item in MList zoeken
-                    {
-                        MList.SelectedIndex = neededindex; //item in MList gevonden en selecteren
-                        Mitem = viewModel.SelectedMovie as Movie;
-                        for (int y = 0; y < WList.Items.Count; y++) //item in WList zoeken
-                        {
-                            Witem = WList.Items[y] as Movie;
-                            if (Witem.Id == Mitem.Id) //item gevonden
-                            {
-                                WList.SelectedIndex = y; //item selecteren
-                                Witem = WList.SelectedItem as Movie;
-                                break;
-                            }
-                            Witem = null;
-                        }
-                        break;
-                    }
-                    neededindex++;
+                    SwitchLists(WishListLbl, ActorsInDB, MovieInDBLbl, QueueLbl);
+                    StatusBarText.Text = "Movie has been added to wishlist.";
                 }
-
-
-                foreach (var item in viewModel.AllMovies)
+                if (Wishlisted.IsChecked == false)
                 {
-                    if (item.Id.Equals(Mitem.Id))
-                    {
-                        if (Wishlisted.IsChecked == true)
-                        {
-                            Mitem.Wishlisted = true;
-                            item.Wishlisted = true;
-                            if (Witem == null)
-                            {
-                                WList.Items.Add(new Movie
-                                    {
-                                        Id = item.Id,
-                                        Name = item.Name,
-                                        Year = item.Year,
-                                        Rating = item.Rating,
-                                        MyRating = item.MyRating,
-                                        SeenIt = item.SeenIt,
-                                        Wishlisted = item.Wishlisted,
-                                        Poster = item.Poster,
-                                        Genres = item.Genres,
-                                        Synopsis = item.Synopsis
-                                    });
-                                WList.SelectedIndex = WList.Items.Count - 1;
-                            }
-                            else
-                            {
-                                Witem.Wishlisted = false;
-                                Wishlisted.IsChecked = false;
-                                wishlistedmovies -= 1;
-                            }
-                            SwitchLists(WishListLbl, ActorsInDB, MovieInDBLbl, QueueLbl);
-                            wishlistedmovies += 1;
-                            StatusBarText.Text = "Movie has been added to wishlist.";
-                        }
-                        if(Wishlisted.IsChecked == false)
-                        {
-                            Mitem.Wishlisted = false; 
-                            Witem.Wishlisted = false;
-                            item.Wishlisted = false;
-                            WList.Items.Remove(WList.SelectedItem);
-                            wishlistedmovies -= 1;
-                            StatusBarText.Text = "Movie has been removed from wishlist.";
-                        }
-                        break;
-                    }
+                    SwitchLists(MovieInDBLbl, ActorsInDB, QueueLbl, WishListLbl);
+                    StatusBarText.Text = "Movie has been removed from wishlist.";
                 }
             }
             else
             {
+                Wishlisted.IsChecked = false;
                 StatusBarText.Text =
                     "No movie selected. Select a movie first form the movie list, and then add them to wishlist.";
             }
         }
-        
+
         /*MYRATING*/
         //update the myrating value
         private void MyNewRatingBox_KeyDown(object sender, KeyEventArgs e)
@@ -887,55 +814,21 @@ namespace The_Final_Re_redemption
             {
                 if (viewModel.SelectedMovie != null)
                 {
-                    var item1 = viewModel.SelectedMovie as Movie;
-                    foreach (var item2 in viewModel.AllMovies)
-                    {
-                        if (item2.Id.Equals(item1.Id))
-                        {
-                            try
-                            {
-                                double NewRating = new double();
-                                if (MyNewRatingBox.Text.Length > 3)
-                                {
-                                    MessageBox.Show(
-                                        "The value you've entered is probably over 9000 or just too long. Please use only one digit after the ,");
-                                }
-                                else if (MyNewRatingBox.Text.Contains("."))
-                                {
-                                    string replaced = MyNewRatingBox.Text.Replace('.', ',');
-                                    NewRating = double.Parse(replaced);
-                                }
-                                else if ((NewRating = double.Parse(MyNewRatingBox.Text)) > 10 || NewRating < 0)
-                                {
-                                    MessageBox.Show(
-                                        "Incorrect value has been entered, please select a value between 0 and 10.");
-                                }
-                                item1.MyRating = NewRating;
-                                item2.MyRating = NewRating;
-                                MyRatingLbl.Content = "My Rating: " + NewRating;
-                                StatusBarText.Text = "You have changed your rating to: " + NewRating;
-                                MyNewRatingBox.Visibility = Visibility.Hidden;
-                                break;
-                            }
-                            catch (Exception ex)
-                            {
-                                MessageBox.Show(ex.Message);
-                            }
-                        }
-                    }
+                    StatusBarText.Text = "You have changed your rating to: " + viewModel.SelectedMovie.MyRating;
+                    MyNewRatingBox.Visibility = Visibility.Hidden;
+                    MList.Focus(); //focus on another object so the propertychanged event is raised.
                 }
             }
         }
-        
-        //change visibility
+        //change visibility and ability to change the user's rating.
         private void MyRatingLbl_MouseEnter(object sender, MouseEventArgs e)
         {
             if (viewModel.SelectedMovie != null)
             {
-                var item1 = viewModel.SelectedMovie as Movie;
-                MyNewRatingBox.Text = item1.MyRating.ToString();
+            //    MyNewRatingBox.Text = viewModel.SelectedMovie.MyRating.ToString();
                 MyNewRatingBox.Visibility = Visibility.Visible;
                 MyNewRatingBox.Focus();
+                MyNewRatingBox.SelectAll();
                 StatusBarText.Text = "To change the rating enter a new value in the box and press 'enter'.";
             }
         }
@@ -943,7 +836,11 @@ namespace The_Final_Re_redemption
         private void MyRatingLbl_MouseLeave(object sender, MouseEventArgs e)
         {
             if (MyNewRatingBox.Visibility == Visibility.Visible)
+            {
+                StatusBarText.Text = "You have changed your rating to: " + viewModel.SelectedMovie.MyRating;
                 MyNewRatingBox.Visibility = Visibility.Hidden;
+                MList.Focus(); //focus on another object so the propertychanged event is raised.
+            } 
         }
 
         /*STATISTICS*/
@@ -975,6 +872,5 @@ namespace The_Final_Re_redemption
                 StatusBarText.Text = "You chose to stay in the matrix, should've chosen the red pill.";
             }
         }
-
     }
 }
