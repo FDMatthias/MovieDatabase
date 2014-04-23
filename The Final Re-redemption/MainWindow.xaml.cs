@@ -177,6 +177,7 @@ namespace The_Final_Re_redemption
             othernr2.Height = 18;
             othernr3.Background = (Brush)(new BrushConverter().ConvertFrom("#FFC3C3C3"));
             othernr3.Height = 18;
+            MList.ItemsSource = viewModel.AllMovies; //Standard procedure to make the ItemsSource of listbox 'MList' = 'AllMovies', because it could have been changed during a search by the user.
 
             if (sender.Equals(MovieInDBLbl))
             {
@@ -297,7 +298,7 @@ namespace The_Final_Re_redemption
                 if (((System.Windows.Controls.TextBox)sender).Text.Trim().Equals(""))
                 {
                     ((System.Windows.Controls.TextBox)sender).Foreground = Brushes.Gray;
-                    ((System.Windows.Controls.TextBox)sender).Text = "Enter Id..";
+                    ((System.Windows.Controls.TextBox)sender).Text = "Enter Id/Name..";
                 }
             }
         }
@@ -540,23 +541,65 @@ namespace The_Final_Re_redemption
         /*SEARCH MOVIE IN DB*/
         private void SearchDBButton_Click(object sender, RoutedEventArgs e)
         {
-            if (searchBox.Text != "Enter Id..")
+            SwitchLists(MovieInDBLbl, ActorsInDB, QueueLbl, WishListLbl);
+            if (searchBox.Text != "Enter Id/Name..")
             {
-                //var result = from o in MList.Items.OfType<Movie>() where o.Id.Contains(searchBox.Text.ToString()) select o;
-                var filteredItems = (ObservableCollection<Movie>)viewModel.AllMovies.Where( p => p.Id != null && p.Id.ToUpper().Contains(searchBox.Text.ToUpper()));
+                //standard search in all movies:
+                var filteredItems = viewModel.AllMovies.Where(p => ((p.Id != null && p.Id.ToUpper().Contains(searchBox.Text.ToUpper())) || (p.Name != null && p.Name.ToUpper().Contains(searchBox.Text.ToUpper()))));
+                //search only in seen movies:
+                if((bool)SearchOnlySeen.IsChecked) 
+                    filteredItems = viewModel.AllMovies.Where(p => (((p.Id != null && p.Id.ToUpper().Contains(searchBox.Text.ToUpper())) || (p.Name != null && p.Name.ToUpper().Contains(searchBox.Text.ToUpper()))) && (p.SeenIt == true)));
+                //search only in wishlisted movies:
+                else if((bool)SearchOnlyWished.IsChecked) 
+                    filteredItems = viewModel.AllMovies.Where(p => (((p.Id != null && p.Id.ToUpper().Contains(searchBox.Text.ToUpper())) || (p.Name != null && p.Name.ToUpper().Contains(searchBox.Text.ToUpper()))) && (p.Wishlisted == true)));
+                
+                //show result:
                 if (filteredItems != null)
                 {
-                    Console.WriteLine(filteredItems);
-                    SwitchLists(MovieInDBLbl, ActorsInDB, QueueLbl, WishListLbl);
-                    StatusBarText.Text = "Movie found in database and selected. You can find the info on the panel to the right.";
+                    MList.ItemsSource = filteredItems;
+                    StatusBarText.Text = filteredItems.Count().ToString() + " movie(s) found in database.";
                 }
                 else
                     StatusBarText.Text = "Movie not found in database.";
+            }
+            else if((bool)SearchOnlySeen.IsChecked)
+            {
+                var filteredItems = viewModel.AllMovies.Where(p => p.SeenIt == true);
+                
+                //show result:
+                if (filteredItems != null)
+                {
+                    MList.ItemsSource = filteredItems;
+                    StatusBarText.Text = filteredItems.Count().ToString() + "Showing all movies you've seen in database.";
+                }
+            }
+            else if ((bool)SearchOnlyWished.IsChecked)
+            {
+                var filteredItems = viewModel.AllMovies.Where(p => p.Wishlisted == true);
+
+                //show result:
+                if (filteredItems != null)
+                {
+                    MList.ItemsSource = filteredItems;
+                    StatusBarText.Text = filteredItems.Count().ToString() + "Showing all movies you've wishlisted in database.";
+                }
             }
             else
             {
                 StatusBarText.Text = "Invalid id entered, please try again. F.e.: 'tt123456789'.";
             }
+            MList.Focus(); //focus on another object so the propertychanged event is raised.
+        }
+        //cancel search
+        private void DeleteSearchBttn_Click(object sender, RoutedEventArgs e)
+        {
+            searchBox.Foreground = Brushes.Gray;
+            searchBox.Text = "Enter Id/Name..";
+            MList.ItemsSource = viewModel.AllMovies;
+            viewModel.GiveFullList();
+            SwitchLists(MovieInDBLbl, ActorsInDB, QueueLbl, WishListLbl); //switch to movie-list
+            MList.SelectedIndex = 0; //select first item from listbox
+            MList.Focus(); //focus on the listbox element.            
         }
 
         private void GetActorInfo_Click(object sender, RoutedEventArgs e)
@@ -582,7 +625,6 @@ namespace The_Final_Re_redemption
                     MessageBox.Show("Actor is not found in the database.");
                     StatusBarText.Text = "Actor has not been found in the database. It's because your database is not up to date or you entered the name wrong.";
                 }
-
             }
             else
             {
@@ -635,7 +677,6 @@ namespace The_Final_Re_redemption
                 AllAList.SelectedIndex = AllAList.Items.Count - 1;
                 StatusBarText.Text = "Actor has been added to the list.";
                 SwitchLists(ActorsInDB, MovieInDBLbl, QueueLbl, WishListLbl);
-                
             }
         }
 
@@ -741,13 +782,21 @@ namespace The_Final_Re_redemption
         /*UPDATE INFO FROM SELECTED MOVIE*/
         private void _SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (viewModel.SelectedMovie.Poster != null)
+            if (viewModel.SelectedMovie != null)
             {
-                PosterMovie.Source = new BitmapImage(new Uri(Path.GetDirectoryName(chosenFile) + "\\Posters\\" + viewModel.SelectedMovie.Poster));
-                StatusBarText.Text = "Movie has been selected, you can find the info in the panel on the right.";
+                if (viewModel.SelectedMovie.Poster != null)
+                {
+                    PosterMovie.Source = new BitmapImage(new Uri(Path.GetDirectoryName(chosenFile) + "\\Posters\\" + viewModel.SelectedMovie.Poster));
+                    StatusBarText.Text = "Movie has been selected, you can find the info in the panel on the right.";
+                }
+                DeleteButton.Visibility = Visibility.Visible;
+                DeleteButton.Opacity = 0.6;
             }
-            DeleteButton.Visibility = Visibility.Visible;
-            DeleteButton.Opacity = 0.6;
+            else
+            {
+                DeleteButton.Visibility = Visibility.Hidden;
+                PosterMovie.Source = null;
+            }
         }
         /*DELETE BUTTON*/
         private void DeleteButton_MouseEnter(object sender, MouseEventArgs e)
@@ -871,6 +920,16 @@ namespace The_Final_Re_redemption
             {
                 StatusBarText.Text = "You chose to stay in the matrix, should've chosen the red pill.";
             }
+        }
+
+        private void SearchOnlySeen_Checked(object sender, RoutedEventArgs e)
+        {
+            SearchOnlyWished.IsChecked = false;
+        }
+
+        private void SearchOnlyWished_Checked(object sender, RoutedEventArgs e)
+        {
+            SearchOnlySeen.IsChecked = false;
         }
     }
 }
