@@ -10,7 +10,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
-using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -23,12 +22,29 @@ using Label = System.Windows.Controls.Label;
 using ListBox = System.Windows.Controls.ListBox;
 using MessageBox = System.Windows.MessageBox;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
-using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
+using OpenFileDialog = Microsoft.Win32.OpenFileDialog;  //<- hier?
 using Path = System.IO.Path;
 using System.ComponentModel;
+using System.Xml;
+using System.Xml.Serialization;
 
 namespace The_Final_Re_redemption
 {
+    public static class ExtensionMethods //method to call when removing items from an observablecollection, f.e.: deleting everything but seen movies
+    {
+        public static int Remove<T>(
+            this ObservableCollection<T> coll, Func<T, bool> condition)
+        {
+            var itemsToRemove = coll.Where(condition).ToList();
+
+            foreach (var itemToRemove in itemsToRemove)
+            {
+                coll.Remove(itemToRemove);
+            }
+
+            return itemsToRemove.Count;
+        }
+    }
     public partial class MainWindow : Window
     {
         public class DelegateCommand : ICommand
@@ -48,9 +64,12 @@ namespace The_Final_Re_redemption
                 _executeMethod.Invoke();
             }
         }
+
+        [XmlRootAttribute("Movie_Database", Namespace = "www.imdb.com")] //change name as 'Movie Database' when saving to XML.
         public class ViewModel
         {
             private ObservableCollection<Actor> a_Actors; //make an observablecollection of all actors
+            [XmlArrayAttribute("Actors")]
             public ObservableCollection<Actor> AllActors
             {
                 get
@@ -95,6 +114,7 @@ namespace The_Final_Re_redemption
             }
             #endregion
             private ObservableCollection<Movie> a_Movies; //make an observablecollection of all movies
+            [XmlArrayAttribute("Movies")]
             public ObservableCollection<Movie> AllMovies { get { return a_Movies; } set { a_Movies = value; } }
            
             public ViewModel() //constructor
@@ -102,7 +122,9 @@ namespace The_Final_Re_redemption
                 a_Actors = new ObservableCollection<Actor>();
                 a_Movies = new ObservableCollection<Movie>();
             }
+            
             private Actor m_SelectedPerson; //save selected actor
+            [XmlElement("Selected_Person")]
             public Actor SelectedPerson
             {
                 get
@@ -114,7 +136,9 @@ namespace The_Final_Re_redemption
                     m_SelectedPerson = value;
                 }
             }
+           
             private Movie m_SelectedMovie; //save selected movie
+            [XmlElement("Selected_Movie")]
             public Movie SelectedMovie
             {
                 get
@@ -146,6 +170,7 @@ namespace The_Final_Re_redemption
         DispatcherTimer ts = new DispatcherTimer();
 
         ViewModel viewModel = new ViewModel();
+
         public MainWindow()
         {
             InitializeComponent();
@@ -601,10 +626,21 @@ namespace The_Final_Re_redemption
             MList.SelectedIndex = 0; //select first item from listbox
             MList.Focus(); //focus on the listbox element.            
         }
+        //search only seen movies
+        private void SearchOnlySeen_Checked(object sender, RoutedEventArgs e) {
+            SearchOnlyWished.IsChecked = false;
+        }
+        //search only wishlisted movies
+        private void SearchOnlyWished_Checked(object sender, RoutedEventArgs e) { 
+            SearchOnlySeen.IsChecked = false;
+        }
 
+       
+        /*METHODS TO DO WITH ACTOR*/
+        //check if input as actorname is downloadable
         private void GetActorInfo_Click(object sender, RoutedEventArgs e)
         {
-           if (ActorTextBox.Text != "Enter actor's name..")
+            if (ActorTextBox.Text != "Enter actor's name..")
             {
                 bool isaanweziginDB = false;
                 thename = ActorTextBox.Text;
@@ -618,7 +654,7 @@ namespace The_Final_Re_redemption
                         DLActor(splitted2[1]);
                     }
                 }
-               
+
                 file.Close();
                 if (!isaanweziginDB)
                 {
@@ -628,13 +664,10 @@ namespace The_Final_Re_redemption
             }
             else
             {
-                MessageBox.Show("Incorrect name entered.");
                 StatusBarText.Text = "Incorrect name was entered. Please try again.";
             }
         }
-
-        /*METHODS TO DO WITH ACTOR*/
-        //methode om de lijst van films van de acteur te downloade
+        //get all info from the actor from imdb
         public void DLActor(string actorId)
         {
             indexSite = actorId;
@@ -642,7 +675,6 @@ namespace The_Final_Re_redemption
             StatusBarText.Text = "Downloading info from actor..";
             wc.DownloadStringAsync(new Uri("http://m.imdb.com/name/" + indexSite + "/filmotype/actor"));
         }
-
         //upon completing DLActor
         private void downloadString_Completed(object sender, DownloadStringCompletedEventArgs e)
         {
@@ -749,14 +781,96 @@ namespace The_Final_Re_redemption
         }
 
         /*SAVE DB FUNCTION*/
-        public void saveButton_Click(object sender, RoutedEventArgs e)
+        //Export to TXT Method
+        public void ExportAsTXT(object sender, RoutedEventArgs e)
         {
-            if (chosenFile == null)
+            var tempallmovies = viewModel.AllMovies; //save the AllMovies from viewModel temporarely because filteredmovies will overwrite.
+            //  var filteredmovies; //filteredmovies will overwrite
+            MList.SelectedIndex = 0; //select a movie to prevent a bug in the xml file not saving a selectedmovie or selected person.
+            AllAList.SelectedIndex = 0;
+            SwitchLists(MovieInDBLbl, ActorsInDB, QueueLbl, WishListLbl);
+            MenuItem m = sender as MenuItem;
+            bool GoAndSave = false;
+            try
             {
-                FolderBrowserDialog dlg = new FolderBrowserDialog();
+                System.Windows.Forms.FolderBrowserDialog dlg = new System.Windows.Forms.FolderBrowserDialog();
                 dlg.ShowDialog();
                 var chosenFolder = dlg.SelectedPath;
-                fi = File.CreateText(chosenFolder + "\\imdb_database_1.txt"); //txt file aanmaken
+                fi = File.CreateText(chosenFolder + "\\" + m.Tag.ToString() + ".txt"); //txt file aanmaken
+                GoAndSave = true;
+            }
+            catch (Exception ex)
+            {
+                GoAndSave = false;
+                MessageBox.Show(ex.Message);
+            }
+            if (GoAndSave)
+            {
+                switch (m.Tag.ToString())
+                {
+                    case "EveryAsTXT":
+                        foreach (var movie in viewModel.AllMovies)
+                        {
+                            fi.Write(movie.ToString());
+                            fi.WriteLine();
+                        }
+                        foreach (var actor in viewModel.AllActors)
+                        {
+                            fi.WriteLine("Actor:#" + actor.ToString());
+                        }
+                        break;
+                    case "SeenAsTXT":
+                        foreach (var movie in viewModel.AllMovies.Where(p => p.SeenIt == true))
+                        {
+                            fi.Write(movie.ToString());
+                            fi.WriteLine();
+                        }
+                        foreach (var actor in viewModel.AllActors)
+                        {
+                            fi.WriteLine("Actor:#" + actor.ToString());
+                        }
+                        break;
+                    case "WishlistedAsTXT":
+                        foreach (var movie in viewModel.AllMovies.Where(p => p.Wishlisted == true))
+                        {
+                            fi.Write(movie.ToString());
+                            fi.WriteLine();
+                        }
+                        foreach (var actor in viewModel.AllActors)
+                        {
+                            fi.WriteLine("Actor:#" + actor.ToString());
+                        }
+                        break;
+                }
+
+                fi.Close();
+            }
+            #region CodeToOverWriteButWeDontReallyNeed
+            /*if (chosenFile == null)
+            {
+                try
+                {
+                    System.Windows.Forms.FolderBrowserDialog dlg = new System.Windows.Forms.FolderBrowserDialog();
+                    dlg.ShowDialog();
+                    var chosenFolder = dlg.SelectedPath;
+                    fi = File.CreateText(chosenFolder + "\\" + m.Tag.ToString() + ".txt"); //txt file aanmaken
+                    //inhoud van txt file schrijven
+                    foreach (var movie in viewModel.AllMovies)
+                    {
+                        fi.Write(movie.ToString());
+                        fi.WriteLine();
+                    }
+                    foreach (var actor in viewModel.AllActors)
+                    {
+                        fi.WriteLine("Actor:#" + actor.ToString());
+                    }
+                    //einde inhoud schrijven
+                    fi.Close();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
             }
             else
             {
@@ -776,8 +890,74 @@ namespace The_Final_Re_redemption
 
                 StatusBarText.Text = "Database has been saved.";
                 System.Windows.MessageBox.Show("Saved database.");
+            }*/
+#endregion
+        }
+        //Export to XML Method
+        private void ExportAsXml(object sender, RoutedEventArgs e)
+        {
+            MList.SelectedIndex = 0; //select a movie to prevent a bug in the xml file not saving a selectedmovie or selected person.
+            AllAList.SelectedIndex = 0;
+            SwitchLists(MovieInDBLbl, ActorsInDB, QueueLbl, WishListLbl);
+            MenuItem b = sender as MenuItem;
+            bool GoAndSave = false;
+            string chosenPath = "";
+            try
+            {
+                System.Windows.Forms.FolderBrowserDialog dlg = new System.Windows.Forms.FolderBrowserDialog();
+                dlg.ShowDialog();
+                chosenPath = dlg.SelectedPath + "\\" + b.Tag.ToString() + ".xml";
+                GoAndSave = true;
+            }
+            catch (Exception ex)
+            {
+                GoAndSave = false;
+                MessageBox.Show(ex.Message);
+            }
+            if (GoAndSave)
+            {
+                if (b.Tag.ToString() != null) //useless check I think?
+                {
+                    switch (b.Tag.ToString())
+                    {
+                        case "EveryAsXML":
+                            SaveToXml(viewModel, chosenPath);
+                            break;
+
+                        case "SeenAsXML": //save only seen movies
+                            ObservableCollection<Movie> tempS = new ObservableCollection<Movie>();
+                            foreach (var item in viewModel.AllMovies) //copy all movies
+                                tempS.Add(item);
+                            viewModel.AllMovies.Remove(x => !x.SeenIt); //delete everything but seen movies
+                            SaveToXml(viewModel, chosenPath);
+                            viewModel.AllMovies.Clear();
+                            foreach (var item in tempS)//reset AllMovies
+                                viewModel.AllMovies.Add(item);
+                            break;
+
+                        case "WishlistedAsXML": //save only seen movies
+                            ObservableCollection<Movie> tempW = new ObservableCollection<Movie>();
+                            foreach (var item in viewModel.AllMovies) //copy all movies
+                                tempW.Add(item);
+                            viewModel.AllMovies.Remove(x => !x.Wishlisted);
+                            SaveToXml(viewModel, chosenPath);
+                            viewModel.AllMovies.Clear();
+                            foreach (var item in tempW)//reset AllMovies
+                                viewModel.AllMovies.Add(item);
+                            break;
+
+                        case "ActorsAsXML": //only save actors
+                            SaveMoviesOrActorsToXml(viewModel, chosenPath, "AllActors", "AllMovies");
+                            break;
+
+                        case "MoviesAsXML": //only save movies
+                            SaveMoviesOrActorsToXml(viewModel, chosenPath, "AllMovies", "AllActors");
+                            break;
+                    }
+                }
             }
         }
+
 
         /*UPDATE INFO FROM SELECTED MOVIE*/
         private void _SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -851,7 +1031,7 @@ namespace The_Final_Re_redemption
             {
                 Wishlisted.IsChecked = false;
                 StatusBarText.Text =
-                    "No movie selected. Select a movie first form the movie list, and then add them to wishlist.";
+                    "No movie selected. Select a movie first from the movie list, and then add them to wishlist.";
             }
         }
 
@@ -864,6 +1044,7 @@ namespace The_Final_Re_redemption
                 if (viewModel.SelectedMovie != null)
                 {
                     StatusBarText.Text = "You have changed your rating to: " + viewModel.SelectedMovie.MyRating;
+                    MyNewRatingBox.Text = viewModel.SelectedMovie.MyRating.ToString();
                     MyNewRatingBox.Visibility = Visibility.Hidden;
                     MList.Focus(); //focus on another object so the propertychanged event is raised.
                 }
@@ -887,6 +1068,7 @@ namespace The_Final_Re_redemption
             if (MyNewRatingBox.Visibility == Visibility.Visible)
             {
                 StatusBarText.Text = "You have changed your rating to: " + viewModel.SelectedMovie.MyRating;
+                MyNewRatingBox.Text = viewModel.SelectedMovie.MyRating.ToString();
                 MyNewRatingBox.Visibility = Visibility.Hidden;
                 MList.Focus(); //focus on another object so the propertychanged event is raised.
             } 
@@ -922,14 +1104,71 @@ namespace The_Final_Re_redemption
             }
         }
 
-        private void SearchOnlySeen_Checked(object sender, RoutedEventArgs e)
+        /* HULPMETHODS TO USE WHILE SAVING/LOADING TO/FROM XML*/
+        public static void SaveToXml<T>(T tosave, string filepath)
         {
-            SearchOnlyWished.IsChecked = false;
+            var x = new XmlSerializer(tosave.GetType());
+            using (var writer = XmlWriter.Create(filepath))
+            {
+                x.Serialize(writer, tosave);
+            }
         }
-
-        private void SearchOnlyWished_Checked(object sender, RoutedEventArgs e)
+        public static T LoadFromXml<T>(string filepath)
         {
-            SearchOnlySeen.IsChecked = false;
+            var serializer = new XmlSerializer(typeof(T));
+            using (var reader = XmlReader.Create(filepath))
+            {
+                return (T)serializer.Deserialize(reader);
+            }
+        }
+        //SAVE ONLY ACTORS OR MOVIES
+        public static void SaveMoviesOrActorsToXml<T>(T tosave, string filepath, string DontIgnore, string DoIgnore) //from http://msdn.microsoft.com/en-us/library/system.xml.serialization.xmlattributes.xmlignore.aspx : ignoring attributes, f.e. when only saving actors or movies
+        {
+            // Create the XmlAttributeOverrides and XmlAttributes objects.
+            XmlAttributeOverrides xOver = new XmlAttributeOverrides();
+            XmlAttributes attrs = new XmlAttributes();
+
+            /* Setting XmlIgnore to false overrides the XmlIgnoreAttribute
+               applied to the Comment field. Thus it will be serialized.*/
+            attrs.XmlIgnore = false;
+            xOver.Add(typeof(T), DontIgnore, attrs);
+
+            /* Use the XmlIgnore to instruct the XmlSerializer to ignore
+               the GroupName instead. */
+            attrs = new XmlAttributes();
+            attrs.XmlIgnore = true;
+            xOver.Add(typeof(T), DoIgnore, attrs);
+
+            var x = new XmlSerializer(tosave.GetType(), xOver );
+            using (var writer = XmlWriter.Create(filepath))
+            {
+                x.Serialize(writer, tosave);
+            }
+        }
+        
+    
+        //Import from XML Method
+        private void LoadXmlFile_Click(object sender, RoutedEventArgs e)
+        {
+            QList.Items.Clear();
+            if (viewModel.AllActors != null)
+                viewModel.AllActors.Clear();
+            if (viewModel.AllMovies != null)
+                viewModel.AllMovies.Clear();
+            try
+            {
+                dlg.ShowDialog();
+                chosenFile = dlg.FileName; //pad opslaan in string chosenFile. Hierin wordt de database opgeslaan.
+                if (chosenFile != null)
+                {
+                    viewModel = LoadFromXml<ViewModel>(chosenFile);
+                    DataContext = viewModel; //reload DataContext, or else this is buggy.
+                }
+            }
+            catch (Exception xException)
+            {
+                MessageBox.Show(xException.Message);
+            }
         }
     }
 }

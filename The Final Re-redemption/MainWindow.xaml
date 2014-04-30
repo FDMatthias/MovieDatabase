@@ -47,8 +47,22 @@
         <Menu HorizontalAlignment="Left" Height="25" VerticalAlignment="Top" Width="992" Grid.ColumnSpan="4" Background="{DynamicResource StatStyle}">
             <MenuItem x:Name="MenuDatabase" Header="Database">
                 <MenuItem Click="ClearDB" Header="Clear database" />
-                <MenuItem Click="loadButton_Click" Header="Load database" />
-                <MenuItem Click="saveButton_Click" Header="Save database" />
+                <MenuItem Header="Load database">
+                    <MenuItem Click="loadButton_Click" Header="Load from .txt file" />
+                    <MenuItem Click="LoadXmlFile_Click" Header="Load from .xml file" />
+                </MenuItem>
+                <MenuItem Header="Export as TXT..">
+                    <MenuItem Click="ExportAsTXT" Tag="EveryAsTXT" Header="Everything in database."/>
+                    <MenuItem Click="ExportAsTXT" Tag="SeenAsTXT" Header="Only seen movies in database."/>
+                    <MenuItem Click="ExportAsTXT" Tag="WishlistedAsTXT" Header="Only wishlisted movies in database."/>
+                </MenuItem>
+                <MenuItem Header="Export as XML..">
+                    <MenuItem Click="ExportAsXml" Tag="EveryAsXML" Header="Everything in database."/>
+                    <MenuItem Click="ExportAsXml" Tag="SeenAsXML" Header="Only seen movies in database."/>
+                    <MenuItem Click="ExportAsXml" Tag="WishlistedAsXML" Header="Only wishlisted movies in database."/>
+                    <MenuItem Click="ExportAsXml" Tag="ActorsAsXML" Header="Only actors in database."/>
+                    <MenuItem Click="ExportAsXml" Tag="MoviesAsXML" Header="Only movies in database."/>
+                </MenuItem>
                 <MenuItem Click="ShowStats" Header="Show statistics"/>
                 <MenuItem Click="CloseButton_Click" Header="Exit"/>
             </MenuItem>

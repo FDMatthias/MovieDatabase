@@ -4,6 +4,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Serialization;
 
 namespace The_Final_Re_redemption
 {
@@ -24,6 +26,10 @@ namespace The_Final_Re_redemption
                     {
                         PropertyChanged(this, new PropertyChangedEventArgs("myrating"));
                     }
+                }
+                else
+                {
+                    throw new Exception("Your new value must be between 0 and 10.");
                 }
             }
         }
@@ -58,6 +64,7 @@ namespace The_Final_Re_redemption
                 }
             }
         }
+        [XmlAttribute] //put name as an attribute in XML-movie-element
         public string Name { get; set; }
         public string Year { get; set; }
         public string Synopsis { get; set; }
